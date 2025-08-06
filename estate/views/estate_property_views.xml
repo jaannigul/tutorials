@@ -21,24 +21,6 @@
         <field name="name">Estate Properties</field>
         <field name="res_model">estate.property</field>
         <field name="view_mode">list,form</field>
-
-    </record>
-
-     <record id="estate_property_type_action" model="ir.actions.act_window">
-        <field name="name">Estate Property Types</field>
-        <field name="res_model">estate.property.type</field>
-        <field name="view_mode">list,form</field>
-    </record>
-
-     <record id="estate_property_type_list_view" model="ir.ui.view">
-        <field name="name">estate.property.type.list</field>
-        <field name="model">estate.property.type</field>
-        <field name="arch" type="xml">
-            <list string="Estate Property Types">
-                <field name="name"/>
-
-            </list>
-        </field>
     </record>
 
     <record id="estate_property_form_view" model="ir.ui.view">
@@ -46,16 +28,23 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Estate Property">
+                <header>
+                    <button name="action_sold_button" type="object" string="Sold"/>
+                    <button name="action_cancelled_button" type="object" string="Cancel"/>
+ 
+                </header>
                 <sheet>
                     <h1><field name="name"/></h1>
                     <group>
                         <group>
                             <group>
-                                <field name="expected_price"/>
+                                <field name="property_tag_ids" widget="many2many_tags" nolabel="1"/>
+                                <field name="date_availability"/>
                                 <field name="postcode"/>
                             </group>
                             <group>
-                                <field name="date_availability"/>
+                                <field name="expected_price"/>
+                                <field name="best_price"/>
                                 <field name="selling_price"/>
                             </group>
                         </group>
@@ -63,11 +52,13 @@
                             
                             <page string="Details">
                                 <group colspan="1">
-                                <label for="description" style="font-weight: bold;">Description</label>
+                                <label for="description">Description</label>
                                 <field name="description" style="width: 300px;" nolabel="1"/>
                                 <field name="bedrooms" style="width: 300px;"/>
                                 <field name="living_area" style="width: 300px;"/>
+                                <field name="garden" style="width: 300px;"/>
                                 <field name="garden_area" style="width: 300px;"/>
+                                <field name="total_area" style="width: 300px;"/>
                                 <field name="garden_orientation" style="width: 300px;"/>
                                 <field name="garage" style="width: 300px;"/>
                                 <field name="active" style="width: 300px;"/>
@@ -75,10 +66,27 @@
                                 
                                 </group>
                             </page>
-                            <page string="Sales">
+
+                            <page string="Offers">
+                                <field name="offer_ids">
+                                <list editable="bottom">
+                                
+                                    <field name="price" style="width: 300px;"/>
+                                    <field name="partner_id" style="width: 300px;" colspan="1"/>
+                                    <field name="validity" style="width: 300px;"/>
+                                    <field name="date_deadline" style="width: 300px;"/>
+                                    <button name="action_accept_offer" type="object" title="Accept" icon="fa-check"/>
+                                    <button name="action_refuse_offer" type="object" title="refuse" icon="fa-times"/>
+                                    <field name="status" style="width: 300px;" readonly="1"/>
+                                
+                                </list>
+                                </field>
+                            </page>
+
+                            <page string="Other info">
                                 <group>
                                     <field name="property_type_id" style="width: 300px;"/>
-                                    <field name="buyer_id" style="width: 300px;"/>
+                                    <field name="buyer_id" style="width: 300px;" readonly="1"/>
                                     <field name="salesperson_id" style="width: 300px;"/>
                                 </group>
                             </page>
