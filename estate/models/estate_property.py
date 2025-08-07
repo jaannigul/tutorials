@@ -1,15 +1,16 @@
 from odoo import fields, models, api, exceptions
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from odoo.tools.float_utils import float_compare,  float_is_zero
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Real Estate Property"
     _sql_constraints=[
-        ('check_expected_price','CHECK expected_price > 0',),
-        ('check_selling_price','CHECK selling_price > 0'),
-        ('check_property_type_name'),
+        ('check_expected_price','CHECK(expected_price > 0)','Expected price must be greater than 0'),
+        ('check_selling_price','CHECK(selling_price >= 0)','Selling price must be greater than 0'),
     ]
-
+    _order="id desc"
+    
     name = fields.Char(required=True, string="Property Name")
     description = fields.Text(string="Description")
     postcode = fields.Char(string="Postcode")
@@ -79,3 +80,16 @@ class EstateProperty(models.Model):
               return True
             elif prop.state == 'sold':
                 raise exceptions.UserError('Sold properties can not be cancelled.')
+            
+    @api.constrains("expected_price","selling_price")
+    def _check_selling_price(self):
+        for prop in self:
+            if (
+                not float_is_zero(prop.selling_price,precision_rounding=0.01)
+                and float_compare(prop.selling_price, 0.9 * prop.expected_price, precision_digits=2) == -1
+            ):
+                raise exceptions.ValidationError(
+                    "Selling price must be at least 90% of the expected price."
+                    + "You must reduce the expected price to accept this offer."
+                    )
+        return True

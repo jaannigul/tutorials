@@ -29,16 +29,19 @@
         <field name="arch" type="xml">
             <form string="Estate Property">
                 <header>
-                    <button name="action_sold_button" type="object" string="Sold"/>
-                    <button name="action_cancelled_button" type="object" string="Cancel"/>
- 
+                    <button name="action_sold_button" type="object" string="Sold" invisible="state == 'sold' or state == 'cancelled'"/>
+
+                    <button name="action_cancelled_button" type="object" string="Cancel" invisible="state == 'sold' or state == 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
                 </header>
                 <sheet>
                     <h1><field name="name"/></h1>
+                    <field name="property_tag_ids" widget="many2many_tags" nolabel="1"/>
                     <group>
                         <group>
                             <group>
-                                <field name="property_tag_ids" widget="many2many_tags" nolabel="1"/>
+                                
+                                <field name="property_type_id" options="{'no_create': True, 'no_edit': True}"/>
                                 <field name="date_availability"/>
                                 <field name="postcode"/>
                             </group>
@@ -57,26 +60,27 @@
                                 <field name="bedrooms" style="width: 300px;"/>
                                 <field name="living_area" style="width: 300px;"/>
                                 <field name="garden" style="width: 300px;"/>
-                                <field name="garden_area" style="width: 300px;"/>
+                                <field name="garden_area" style="width: 300px;" invisible="not garden"/>
                                 <field name="total_area" style="width: 300px;"/>
-                                <field name="garden_orientation" style="width: 300px;"/>
+                                <field name="garden_orientation" style="width: 300px;" invisible="not garden"/>
                                 <field name="garage" style="width: 300px;"/>
                                 <field name="active" style="width: 300px;"/>
-                                <field name="state" style="width: 300px;"/>
+                                
                                 
                                 </group>
                             </page>
 
                             <page string="Offers">
                                 <field name="offer_ids">
+                                    
                                 <list editable="bottom">
-                                
-                                    <field name="price" style="width: 300px;"/>
-                                    <field name="partner_id" style="width: 300px;" colspan="1"/>
-                                    <field name="validity" style="width: 300px;"/>
-                                    <field name="date_deadline" style="width: 300px;"/>
-                                    <button name="action_accept_offer" type="object" title="Accept" icon="fa-check"/>
-                                    <button name="action_refuse_offer" type="object" title="refuse" icon="fa-times"/>
+                                <!--bug-->
+                                    <field name="price" style="width: 300px;" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]"/>
+                                    <field name="partner_id" style="width: 300px;" colspan="1" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]" />
+                                    <field name="validity" style="width: 300px;" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]"/>
+                                    <field name="date_deadline" style="width: 300px;" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]"/>
+                                    <button name="action_accept_offer" type="object" title="Accept" icon="fa-check" invisible="status == 'accepted' or status == 'refused'"/>
+                                    <button name="action_refuse_offer" type="object" title="refuse" icon="fa-times" invisible="status == 'accepted' or status == 'refused'"/>
                                     <field name="status" style="width: 300px;" readonly="1"/>
                                 
                                 </list>
@@ -85,7 +89,7 @@
 
                             <page string="Other info">
                                 <group>
-                                    <field name="property_type_id" style="width: 300px;"/>
+                                
                                     <field name="buyer_id" style="width: 300px;" readonly="1"/>
                                     <field name="salesperson_id" style="width: 300px;"/>
                                 </group>

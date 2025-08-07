@@ -5,8 +5,9 @@ class EstatePropertyOffer(models.Model):
     _name = 'estate.property.offer'
     _description = 'Estate Property Offer'
     _sql_constraints=[
-        ('check_offer_price','CHECK expected_price > 0',),
+        ('check_offer_price','CHECK(price > 0)', 'Expected price must be greater than 0'),
     ]
+    _order="price desc"
 
     price = fields.Float(string='Price')
     status = fields.Selection(string='Status',
@@ -42,11 +43,7 @@ class EstatePropertyOffer(models.Model):
 
         self.status = 'accepted'
 
-        other_offers = self.search([
-            ('property_id', '=', self.property_id.id),
-            ('id', '!=', self.id)
-        ])
-        other_offers.write({'status': 'refused'})
+        
         self.property_id.selling_price = self.price
         self.property_id.buyer_id = self.partner_id.id
         self.property_id.state = 'offer_accepted'
