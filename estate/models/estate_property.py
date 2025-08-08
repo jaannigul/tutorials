@@ -93,3 +93,10 @@ class EstateProperty(models.Model):
                     + "You must reduce the expected price to accept this offer."
                     )
         return True
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_new_or_cancelled(self):
+        for record in self:
+            if record.state not in ('new', 'cancelled'):
+                raise exceptions.UserError("Only properties in 'New' or 'Cancelled' state can be deleted.")
+
+

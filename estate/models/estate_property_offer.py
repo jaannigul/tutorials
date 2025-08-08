@@ -18,7 +18,7 @@ class EstatePropertyOffer(models.Model):
 
     partner_id = fields.Many2one("res.partner", required=True, string="Partner")
     property_id = fields.Many2one("estate.property", required=True,string="Property")
-
+    property_type_id = fields.Many2one(related="property_id.property_type_id", store=True)
     @api.depends("create_date", "validity")
     def _compute_date_deadline(self):
         for offer in self:
@@ -61,3 +61,19 @@ class EstatePropertyOffer(models.Model):
             
         return True
         
+    @api.model
+    def create(self, vals):
+        # deprecated?
+        property_id = vals.get("property_id")
+        price = vals.get("price")
+
+        if property_id and price:
+            property = self.env["estate.property"].browse(property_id)
+        
+        existing_offers = self.search([('property_id', '=', property_id), ('price', '>', price)])
+        if existing_offers:
+            raise exceptions.UserError("A higher offer already exists for this property.")
+        
+        if property.state == 'new':
+            property.state = 'offer_received'
+        return super().create(vals)

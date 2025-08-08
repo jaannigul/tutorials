@@ -10,6 +10,7 @@
                 <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
                 <filter name="filter_inactive" string="Inactive" domain="[('active', '=', False)]"/>
                 <filter name="filter_available" string="Available" domain="['|', ('state', '=', 'new'), ('state', '=', 'offer_received')]"/>
+                <field name="living_area" string="Search for living area greater than:" filter_domain="[('living_area', '>=', self)]"/>
                 <group expand="1" string="Group By">
                     <filter name="group_postcode" string="Postcode" context="{'group_by': 'postcode'}"/>
                 </group>
@@ -21,6 +22,8 @@
         <field name="name">Estate Properties</field>
         <field name="res_model">estate.property</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_available': 1}</field>
+    
     </record>
 
     <record id="estate_property_form_view" model="ir.ui.view">
@@ -36,7 +39,7 @@
                 </header>
                 <sheet>
                     <h1><field name="name"/></h1>
-                    <field name="property_tag_ids" widget="many2many_tags" nolabel="1"/>
+                    <field name="property_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" nolabel="1"/>
                     <group>
                         <group>
                             <group>
@@ -73,15 +76,14 @@
                             <page string="Offers">
                                 <field name="offer_ids">
                                     
-                                <list editable="bottom">
-                                <!--bug-->
-                                    <field name="price" style="width: 300px;" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]"/>
-                                    <field name="partner_id" style="width: 300px;" colspan="1" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]" />
-                                    <field name="validity" style="width: 300px;" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]"/>
-                                    <field name="date_deadline" style="width: 300px;" readonly="['|', ('state', '=', 'offer_accepted'), ('state', '=', 'sold'), ('state', '=', 'cancelled')]"/>
+                                <list editable="bottom" decoration-success="status == 'accepted'" decoration-danger="status=='refused'">
+                                    <field name="price" style="width: 300px;" readonly="'state' in ('offer_accepted', 'sold', 'cancelled')" /> <!--!!!-->
+                                    <field name="partner_id" style="width: 300px;" colspan="1" readonly="'state' in ('offer_accepted', 'sold', 'cancelled')"  />
+                                    <field name="validity" style="width: 300px;" readonly="'state' in ('offer_accepted', 'sold', 'cancelled')" />
+                                    <field name="date_deadline" style="width: 300px;" readonly="'state' in ('offer_accepted', 'sold', 'cancelled')" />
                                     <button name="action_accept_offer" type="object" title="Accept" icon="fa-check" invisible="status == 'accepted' or status == 'refused'"/>
                                     <button name="action_refuse_offer" type="object" title="refuse" icon="fa-times" invisible="status == 'accepted' or status == 'refused'"/>
-                                    <field name="status" style="width: 300px;" readonly="1"/>
+
                                 
                                 </list>
                                 </field>
@@ -107,12 +109,19 @@
         <field name="name">estate.property.list</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
-            <list string="Estate Properties">
+            <list string="Estate Properties"  decoration-bf="state == 'offer_accepted' and {'color': 'green', 'font-weight': 'bold'}" 
+                decoration-success="state in ('offer_received','offer_accepted')"  
+                decoration-muted="state == 'sold'">
                 <field name="name"/>
+                <field name="property_type_id"/>
+                <field name="postcode"/>
+                <field name="property_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="bedrooms"/>
+                <field name="living_area"/>
                 <field name="expected_price"/>
                 <field name="selling_price"/>
-                <field name="state"/>
-                <field name="date_availability"/>
+                <field name="date_availability" optional="hide"/>
+                <field name="state" optional="hide"/>
             </list>
         </field>
 
